@@ -4,9 +4,7 @@ import { SuiClient } from '@mysten/sui.js/client';
 import { bech32 } from 'bech32';
 import dotenv from 'dotenv';
 
-
 export async function sendSUI(pk, myrec, myam) {
-
   let privateKey = pk;
   const decoded = bech32.decode(privateKey);
   const bytes = Buffer.from(bech32.fromWords(decoded.words));
@@ -40,10 +38,15 @@ export async function sendSUI(pk, myrec, myam) {
     console.log('✅ Transaction successful!')
     console.log('📝 Transaction hash:', result.digest)
     console.log('🔗 View on Explorer:', `https://suiexplorer.com/txblock/${result.digest}?network=testnet`)
+    return result
   } catch (error) {
     console.error('❌ Transaction failed:', error)
   }
 }
 
 // Run the test
-sendSUI()
+sendSUI(
+  "suiprivkey1qryc3tj980ke0250jwm479fcncgelh3flu68pvke5ggyactdglkeqwjhayx",
+  "0x3f6bb1bdaaacafd020194d452a5a1afce89114cd5fafa3aebc9b214e83aa2ef2",
+  0.001
+)

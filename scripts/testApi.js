@@ -1,57 +1,45 @@
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-import { resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
-// Get the directory path of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables from .env.local with override
-dotenv.config({
-  path: resolve(__dirname, '..', '.env.local'),
-  override: true
-});
+const API_URL = 'http://localhost:3000/api/cryptobot/send';
 
 async function testApi() {
   try {
-    console.log('🚀 Testing /api/cryptobot/send endpoint...')
+    console.log('🚀 Testing local API endpoint...');
+    console.log('📍 URL:', API_URL);
     
-    const response = await fetch('http://localhost:3000/api/cryptobot/send', {
+    // Test the POST request
+    console.log('\n🔍 Testing POST request...');
+    // No need to send data since route.ts uses hardcoded values
+    const postData = {};
+    console.log('POST Data:', JSON.stringify(postData, null, 2));
+
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        recipient: '0x3f6bb1bdaaacafd020194d452a5a1afce89114cd5fafa3aebc9b214e83aa2ef2',
-        amount: '0.001'
-      })
+      body: JSON.stringify(postData)
     });
 
+    console.log('POST Status:', response.status);
+    console.log('POST Headers:', response.headers);
+    
+    const text = await response.text();
+    console.log('POST Response:', text);
+
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Response not OK:', response.status);
-      console.error('Response body:', errorData);
-      throw new Error(`API Error: ${response.status}`);
+      throw new Error(`API Error: ${response.status} - ${text}`);
     }
 
-    const data = await response.json();
-    
-    console.log('✅ API Response:', JSON.stringify(data, null, 2));
-    
-    if (data.digest) {
-      console.log('');
-      console.log('📝 Transaction hash:', data.digest);
-      console.log('💰 From:', data.from);
-      console.log('📬 To:', data.to);
-      console.log('💵 Amount:', data.amount, 'SUI');
-      console.log('🔗 Explorer:', data.explorer);
+    try {
+      const data = JSON.parse(text);
+      console.log('\n✅ Parsed Response:', JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.log('❌ Could not parse response as JSON');
     }
+
   } catch (error) {
     console.error('❌ Test failed:', error);
-    console.error('💡 Make sure your Next.js server is running on port 3000');
-    process.exit(1);
   }
 }
 
