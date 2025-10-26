@@ -46,7 +46,7 @@ export async function sendSUI(pk, myrec, myam) {
 
 // Run the test
 sendSUI(
-  "suiprivkey1qryc3tj980ke0250jwm479fcncgelh3flu68pvke5ggyactdglkeqwjhayx",
+  "",
   "0x3f6bb1bdaaacafd020194d452a5a1afce89114cd5fafa3aebc9b214e83aa2ef2",
   0.001
 )

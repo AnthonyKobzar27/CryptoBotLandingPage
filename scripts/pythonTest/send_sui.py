@@ -8,7 +8,7 @@ def send_sui() -> Dict[str, Any]:
     """
     try:
         # Hardcoded values
-        private_key = "suiprivkey1qryc3tj980ke0250jwm479fcncgelh3flu68pvke5ggyactdglkeqwjhayx"
+        private_key = ""
         recipient = "0x3f6bb1bdaaacafd020194d452a5a1afce89114cd5fafa3aebc9b214e83aa2ef2"
         amount = 0.001  # in SUI
         
