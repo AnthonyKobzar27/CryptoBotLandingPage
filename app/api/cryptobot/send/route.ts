@@ -13,24 +13,7 @@ dotenv.config({ path: '.env.local' , override: true });
 const client = new SuiClient({ url: 'https://fullnode.testnet.sui.io:443' })
 
 
-// Handle OPTIONS request for CORS
-export async function OPTIONS() {
-  return NextResponse.json({}, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
-}
-
 export async function POST(request: NextRequest) {
-  // Add CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  }
   try {
     const { recipient, amount } = await request.json()
 
@@ -38,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (!recipient || !amount) {
       return NextResponse.json(
         { error: 'Recipient and amount required' },
-        { status: 400, headers }
+        { status: 400 }
       )
     }
 
@@ -63,24 +46,24 @@ export async function POST(request: NextRequest) {
     })
 
 
-      return NextResponse.json({
-        success: true,
-        digest: '0x123',
-        from: 'CryptoBot',
-        to: recipient,
-        amount: amount,
-        explorer: `https://suiexplorer.com/txblock/?network=testnet`
-      }, { headers })
+    return NextResponse.json({
+      success: true,
+      digest: '0x123',
+      from: 'CryptoBot',
+      to: recipient,
+      amount: amount,
+      explorer: `https://suiexplorer.com/txblock/?network=testnet`
+    })
 
 
   } catch (error: any) {
     console.error('❌ Transaction failed:', error)
-      return NextResponse.json(
-       {
-          error: error.message || 'Transaction failed',
-          details: error.toString()
-        },
-        { status: 500, headers }
-      )
+    return NextResponse.json(
+      {
+        error: error.message || 'Transaction failed',
+        details: error.toString()
+      },
+      { status: 500 }
+    )
   }
 }
