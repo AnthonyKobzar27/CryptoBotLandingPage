@@ -1,11 +1,21 @@
 import fetch from 'node-fetch';
 
-const API_URL = 'https://crypto-bot-landing-page.vercel.app/api/cryptobot/send';
+// Test the base URL first
+const BASE_URL = 'https://crypto-bot-landing-page.vercel.app';
+//const API_URL = `${BASE_URL}/api/cryptobot/send`;
+const API_URL = 'http://localhost:3000/api/cryptobot/send';
 
 async function testApi() {
   try {
-    console.log('🚀 Testing production API endpoint...');
-    console.log('📍 URL:', API_URL);
+    console.log('🚀 Testing production endpoint...');
+    
+    // First check if the base URL is accessible
+    console.log('\n🔍 Testing base URL:', BASE_URL);
+    const baseResponse = await fetch(BASE_URL);
+    console.log('Base URL Status:', baseResponse.status);
+    
+    // Now test the API endpoint
+    console.log('\n📍 Testing API URL:', API_URL);
     
     // Test the POST request
     console.log('\n🔍 Testing POST request...');
