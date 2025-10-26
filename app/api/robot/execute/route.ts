@@ -38,6 +38,24 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           )
         }
+
+        // Validate recipient address
+        if (!recipient.startsWith('0x') || recipient.length !== 66) {
+          return NextResponse.json(
+            { error: 'Invalid recipient address. Must be a valid SUI address starting with 0x' },
+            { status: 400 }
+          )
+        }
+
+        // Validate amount
+        const amountNum = parseFloat(amount)
+        if (isNaN(amountNum) || amountNum <= 0 || amountNum < 0.000001) {
+          return NextResponse.json(
+            { error: 'Invalid amount. Must be greater than 0.000001 SUI' },
+            { status: 400 }
+          )
+        }
+
         result = await executeSendTransaction(recipient, amount)
         break
 
@@ -66,8 +84,11 @@ async function executeSendTransaction(recipient: string, amount: string) {
   const robotAddress = getRobotAddress()
   const tx = new TransactionBlock()
 
+  // Convert amount to MIST (1 SUI = 1_000_000_000 MIST)
+  const amountInMist = BigInt(Math.floor(parseFloat(amount) * 1_000_000_000))
+  
   const [coin] = tx.splitCoins(tx.gas, [
-    tx.pure(parseFloat(amount) * 1_000_000_000)
+    tx.pure(amountInMist.toString())
   ])
   tx.transferObjects([coin], tx.pure(recipient))
 
