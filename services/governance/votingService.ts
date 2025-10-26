@@ -1,7 +1,7 @@
 'use client'
 
 import { SuiClient } from '@mysten/sui.js/client'
-import { Transaction } from '@mysten/sui/transactions'
+import { TransactionBlock } from '@mysten/sui.js/transactions'
 import { VoteTransaction } from '@/lib/governance/types'
 import { getRobotSigner, signAndExecuteTransaction } from '@/lib/robotSigner'
 import { logTransaction } from '@/services/transactionLogger'
@@ -34,7 +34,7 @@ export class VotingService {
       }
 
       // Create a transaction to call our governance contract
-      const tx = new Transaction()
+      const tx = new TransactionBlock()
       
       // Get CryptoBot's voting power (current balance)
       const balance = await this.client.getBalance({
@@ -42,7 +42,8 @@ export class VotingService {
       })
       
       // Split coins for voting power
-      const [votingPowerCoin] = tx.splitCoins(tx.gas, [tx.pure(balance.totalBalance)])
+      const amount = BigInt(balance.totalBalance)
+      const [votingPowerCoin] = tx.splitCoins(tx.gas, [tx.pure(amount.toString())])
       
       // Use SUI's built-in staking for voting power
       tx.moveCall({
