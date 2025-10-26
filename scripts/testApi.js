@@ -1,16 +1,18 @@
 import fetch from 'node-fetch';
 
-const API_URL = 'http://localhost:3000/api/cryptobot/send';
+const API_URL = 'https://crypto-bot-landing-page.vercel.app/api/cryptobot/send';
 
 async function testApi() {
   try {
-    console.log('🚀 Testing local API endpoint...');
+    console.log('🚀 Testing production API endpoint...');
     console.log('📍 URL:', API_URL);
     
     // Test the POST request
     console.log('\n🔍 Testing POST request...');
-    // No need to send data since route.ts uses hardcoded values
-    const postData = {};
+    const postData = {
+      recipient: '0x3f6bb1bdaaacafd020194d452a5a1afce89114cd5fafa3aebc9b214e83aa2ef2',
+      amount: 0.001
+    };
     console.log('POST Data:', JSON.stringify(postData, null, 2));
 
     const response = await fetch(API_URL, {
