@@ -9,18 +9,23 @@ export function initializeRobotSigner(): Ed25519Keypair | null {
     return robotKeypair
   }
 
+  console.log('🔍 Checking for CryptoBot private key...')
   const privateKey = process.env.CRYPTOBOT_PRIVATE_KEY
   
   if (!privateKey) {
-
+    console.error('❌ CRYPTOBOT_PRIVATE_KEY not found in environment')
+    console.error('📝 Make sure .env.local exists in robotdapp folder')
+    console.error('🔄 Restart dev server after adding environment variables')
     return null
   }
 
   try {
     robotKeypair = Ed25519Keypair.fromSecretKey(privateKey as any)
+    console.log('✅ CryptoBot signer initialized successfully')
     return robotKeypair
   } catch (error) {
-
+    console.error('❌ Error initializing CryptoBot signer:', error)
+    console.error('💡 Run: node scripts/generateRobotWallet.js to get correct format')
     return null
   }
 }
@@ -43,6 +48,12 @@ export async function signAndExecuteTransaction(
   }
 
   try {
+    console.log('🔑 Signing transaction with CryptoBot signer...')
+    console.log('📝 Transaction details:', {
+      signer: signer.getPublicKey().toSuiAddress(),
+      gas: tx.gas ? tx.gas.toString() : 'undefined'
+    })
+
     const result = await suiClient.signAndExecuteTransactionBlock({
       signer,
       transactionBlock: tx,
@@ -50,6 +61,11 @@ export async function signAndExecuteTransaction(
         showEffects: true,
         showObjectChanges: true,
       },
+    })
+    
+    console.log('✅ Transaction signed and executed:', {
+      digest: result.digest,
+      effects: result.effects
     })
     
     return result

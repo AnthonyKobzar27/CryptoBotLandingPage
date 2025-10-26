@@ -73,8 +73,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: result })
   } catch (error: any) {
     console.error('API Error:', error)
+    console.error('Stack trace:', error.stack)
     return NextResponse.json(
-      { error: error.message || 'Transaction failed' },
+      { 
+        error: error.message || 'Transaction failed',
+        details: error.stack
+      },
       { status: 500 }
     )
   }
@@ -82,47 +86,73 @@ export async function POST(request: NextRequest) {
 
 async function executeSendTransaction(recipient: string, amount: string) {
   const robotAddress = getRobotAddress()
-  const tx = new TransactionBlock()
+  if (!robotAddress) {
+    throw new Error('CryptoBot address not available')
+  }
 
-  // Convert amount to MIST (1 SUI = 1_000_000_000 MIST)
-  const amountInMist = BigInt(Math.floor(parseFloat(amount) * 1_000_000_000))
-  
-  const [coin] = tx.splitCoins(tx.gas, [
-    tx.pure(amountInMist.toString())
-  ])
-  tx.transferObjects([coin], tx.pure(recipient))
+  try {
+    console.log('Starting transaction:', { recipient, amount })
+    console.log('CryptoBot address:', robotAddress)
+    
+    const tx = new TransactionBlock()
+    console.log('Created transaction block')
 
-  const result = await signAndExecuteTransaction(tx, suiClient)
+    // Convert amount to MIST (1 SUI = 1_000_000_000 MIST)
+    const amountInMist = BigInt(Math.floor(parseFloat(amount) * 1_000_000_000))
+    console.log('Amount in MIST:', amountInMist.toString())
+    
+    const [coin] = tx.splitCoins(tx.gas, [
+      tx.pure(amountInMist.toString())
+    ])
+    console.log('Split coins for transaction')
+    
+    tx.transferObjects([coin], tx.pure(recipient))
+    console.log('Added transfer to transaction')
 
-  await logTransaction({
-    fromAddress: robotAddress,
-    toAddress: recipient,
-    amount: amount,
-    coinType: 'SUI',
-    transactionHash: result.digest
-  })
+    console.log('Executing transaction...')
+    const result = await signAndExecuteTransaction(tx, suiClient)
+    console.log('Transaction executed:', result)
 
-  return {
-    digest: result.digest,
-    from: robotAddress,
-    to: recipient,
-    amount: amount,
-    status: 'completed'
+    await logTransaction({
+      fromAddress: robotAddress,
+      toAddress: recipient,
+      amount: amount,
+      coinType: 'SUI',
+      transactionHash: result.digest
+    })
+
+    return {
+      digest: result.digest,
+      from: robotAddress,
+      to: recipient,
+      amount: amount,
+      status: 'completed'
+    }
+  } catch (error) {
+    console.error('Transaction failed:', error)
+    throw error
   }
 }
 
-async function getBalance() {
-  const robotAddress = getRobotAddress()
-  
-  const balance = await suiClient.getBalance({
-    owner: robotAddress,
-    coinType: '0x2::sui::SUI'
-  })
+async function getBalance(): Promise<{ address: string; balance: string; coinType: string }> {
+  try {
+    const robotAddress = getRobotAddress()
+    if (!robotAddress) {
+      throw new Error('CryptoBot address not available')
+    }
+    
+    const balance = await suiClient.getBalance({
+      owner: robotAddress,
+      coinType: '0x2::sui::SUI'
+    })
 
-  return {
-    address: robotAddress,
-    balance: (parseInt(balance.totalBalance) / 1_000_000_000).toString(),
-    coinType: 'SUI'
+    return {
+      address: robotAddress,
+      balance: (parseInt(balance.totalBalance) / 1_000_000_000).toString(),
+      coinType: 'SUI'
+    }
+  } catch (error) {
+    console.error('Failed to get balance:', error)
+    throw error
   }
 }
-
